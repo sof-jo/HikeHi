@@ -1,0 +1,6 @@
+{
+    "username": "YOUR_EMAIL_HERE",
+    "password": "YOUR_PASSWORD_HERE",
+    "src_folder": "YOUR_DEFAULT_DOWNLOAD_FOLDER_PATH_HERE",
+    "dst_folder": "YOUR_DESTINATION_FOLDER_PATH_HERE"
+}

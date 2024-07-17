@@ -1,0 +1,210 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HikeHi</title>
+     <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+       body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+       header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+       header img {
+            margin-right: 1rem;
+            width: 80px;
+            height: auto;
+        }
+       header h1 {
+            font-size: 1.5rem;
+        }
+        #map-container {
+            flex: 1;
+            position: relative;
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        footer {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            flex-shrink: 0;
+        }
+       .leaflet-popup-content h3 {
+            margin-top: 0;
+            font-size: 1.2em;
+            color: #333;
+        }
+        .leaflet-popup-content p {
+            margin: 0.5em 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+        .leaflet-control-layers-toggle {
+            background-color: #4CAF50 !important;
+        }
+        .leaflet-control-layers-list label {
+            cursor: pointer;
+        }
+        .leaflet-control-layers-list label:hover {
+            background-color: #f0f0f0;
+        }
+        a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        #loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            font-size: 1.5rem;
+            color: #4CAF50;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="loading-overlay">Loading Trails...</div>
+    <header>
+        <img src="{% static 'images/logo.jpg' %}" alt="Logo">
+        <h1>My Wikiloc trails on a map</h1>
+    </header>
+
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
+    <footer>
+        <p>2024 HikeHi by Ioannis Sofios. For educational purposes.</p>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-omnivore/0.3.4/leaflet-omnivore.min.js"></script>
+    <script>
+        var map = L.map('map').setView([37.983810, 23.727539], 8);
+        var openstreetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        });
+        var opentopoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.opentopomap.org/copyright">OpenTopoMap</a>'
+        });
+        var cartoDBPositron = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        });
+        var ktimatologioLayer = L.tileLayer.wms('https://gis.ktimanet.gr/wms/wmsopen/wmsserver.aspx', {
+            layers: 'ktbase',
+            format: 'image/png',
+            transparent: true,
+            attribution: '&copy; <a href="https://www.ktimatologio.gr/">Ktimatologio Greece</a>'
+        });
+
+        cartoDBPositron.addTo(map);
+        var baseLayers = {
+            "Open Street Map": openstreetLayer,
+            "Open Topo Map": opentopoLayer,
+            "Ktimatologio Greece": ktimatologioLayer,
+            "CartoDB Positron": cartoDBPositron,
+        };
+        L.control.layers(baseLayers).addTo(map);
+
+
+        var trails = [
+            {% for trail in trails %}
+            {
+                kml_path: '{% static "kml_files/" %}{{ trail.kml_file_name }}.kml',
+                trail_name: '{{ trail.trail_name }}',
+                distance: '{{ trail.distance }}',
+                elevation_gain: '{{ trail.elevation_gain }}',
+                elevation_loss: '{{ trail.elevation_loss }}',
+                difficulty: '{{ trail.technical_difficulty }}',
+                max_elevation: '{{ trail.max_elevation }}',
+                min_elevation: '{{ trail.min_elevation }}',
+                trail_type: '{{ trail.trail_type }}',
+                total_time: '{{ trail.total_time }}',
+                recorded: '{{ trail.recorded }}',
+                url: '{{ trail.url }}'
+            },
+            {% endfor %}
+        ];
+
+        var trailsLoaded = 0;
+
+        function hideLoadingOverlay() {
+            trailsLoaded++;
+            if (trailsLoaded === trails.length) {
+                document.getElementById('loading-overlay').style.display = 'none';
+                map.setView([37.983810, 23.727539], 4);
+            }
+        }
+
+        trails.forEach(function(trail) {
+            var kmlLayer = omnivore.kml(trail.kml_path)
+                .on('ready', function() {
+                    map.fitBounds(kmlLayer.getBounds());
+                    setTimeout(function() {
+                        hideLoadingOverlay();
+                    }, 2000);
+                })
+
+                .on('mouseover', function(e) {
+                    kmlLayer.setStyle({ weight: 8, color: 'orange' });
+                    var popupContent = `
+                        <h3>${trail.trail_name}</h3>
+                        <p><strong>Distance (km):</strong> ${trail.distance}</p>
+                        <p><strong>Elevation Gain (m):</strong> ${trail.elevation_gain}</p>
+                        <p><strong>Elevation Loss (m):</strong> ${trail.elevation_loss}</p>
+                        <p><strong>Difficulty:</strong> ${trail.difficulty}</p>
+                        <p><strong>Max Elevation (m):</strong> ${trail.max_elevation}</p>
+                        <p><strong>Min Elevation (m):</strong> ${trail.min_elevation}</p>
+                        <p><strong>Trail Type:</strong> ${trail.trail_type}</p>
+                        <p><strong>Total Time:</strong> ${trail.total_time}</p>
+                        <p><strong>Recorded:</strong> ${trail.recorded}</p>
+                        <a href="${trail.url}" target="_blank">More info in Wikiloc</a>
+                    `;
+                    L.popup()
+                        .setLatLng(e.latlng)
+                        .setContent(popupContent)
+                        .openOn(map);
+                })
+                .on('mouseout', function() {
+                    kmlLayer.setStyle({ weight: 2, color: '#3388ff' });
+                });
+            kmlLayer.addTo(map);
+        });
+
+
+
+    </script>
+</body>
+</html>
