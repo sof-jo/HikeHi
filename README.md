@@ -11,7 +11,7 @@ How to use:
 3. Finally run the main_script.py module.
 
 Additionaly, 
-1. If you want to delete everything to start anew and can't delete the database please run kill_db.py module.
+1. If you want to delete the produced files(“hiking_data.json”,“hiking_data.db”,"dst_bar_plot.png") to start anew and can't delete the “hiking_data.db” database, please run kill_db.py module.
 2. If you have already run the main_script.py module and only want to see the /map webpage, please open main_script.py module, disable the modules under "#Run modules:".
 3. Downloading kml files takes a few minutes, so if you just want to test this project, in order to save time, open web_scraper.py, go to "def get_url_list():" and disable "next_page()". This should find and download a maximum of 10 hiking trails.
 
