@@ -1,4 +1,4 @@
-HikeHi is a Python-based project designed for hiking enthusiasts to help them visualize and analyze their hiking trails. The application collects data from the Wikiloc website, specifically from the hiking trails uploaded by a user with their credentials, and displays this data along with a map of the routes on a webpage. It is a full stack web development project, involving web scraping, data cleaning and processing, database creation, and the creation of an interactive website. 
+HikeHi is a Python-based project designed for hiking enthusiasts to help them visualize and analyze their hiking trails. The application collects data from the Wikiloc website, specifically from the hiking trails uploaded by a user with their credentials, and displays this data along with a map of the routes on a webpage. It is a full stack web development project, involving web scraping, data cleaning and processing, database creation, and building of an interactive website. 
 
 This project was developed on July 2024 for HAEC Python seminar in Athens Greece with Python 3.12, and it's used for educational purposes.
 
